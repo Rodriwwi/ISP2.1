@@ -28,6 +28,7 @@ class TransmitterAntenna:
     TX_frequency: float = 0.0  # GHz
     TX_power: float = 0.0  # dBm
     TX_gain: float = 0.0  # dBi
+    connected_devices = []
 
     def __init__(self, tx_id: str, position: Tuple[float, float], height: float, bandwidth: float, frequency: float, p_tx: float, gain: float):
         """
@@ -52,6 +53,7 @@ class TransmitterAntenna:
         self.TX_frequency = frequency
         self.TX_gain = gain
         self.TX_power = p_tx
+        self.connected_devices = []
 
     def __str__(self):
         """

@@ -47,14 +47,13 @@ if __name__ == '__main__':
     movil = RxDevice("movil",pos_movil,elevation_movil,gain_movil,transmisor.TX_bandwidth/2)
     tablet = RxDevice("tablet",pos_tablet,elevation_tablet,gain_tablet,transmisor.TX_bandwidth/2)
 
-    #Lógica
-    # en el movil
+    #Distancias
     distancia_TX1_movil = mu.calculate_distance(transmisor.TX_position, movil.RX_position)
     distancia_TX2_movil = mu.calculate_distance(repetidor.TX_position, movil.RX_position)
     distancia_TX1_tablet = mu.calculate_distance(transmisor.TX_position, tablet.RX_position)
     distancia_TX2_tablet = mu.calculate_distance(repetidor.TX_position, tablet.RX_position)
 
-    # FSPL
+    #FSPL
     free_space_path_loss_TX_movil = me.free_space_path_losses(distancia_TX1_movil, transmisor.TX_frequency)
     print("Pérdidas en espacio libre entre el TX y el móvil: " + str(free_space_path_loss_TX_movil) + " dB")
     free_space_path_loss_repe_movil = me.free_space_path_losses(distancia_TX2_movil, transmisor.TX_frequency)
@@ -71,29 +70,46 @@ if __name__ == '__main__':
 
     if rx_power_movil_tx1 > rx_power_movil_tx2:
         movil.RX_power = rx_power_movil_tx1
+        transmisor.connected_devices.append(tablet.RX_id)
+        interference = rx_power_movil_tx2
     else:
         movil.RX_power = rx_power_movil_tx2
+        repetidor.connected_devices.append(tablet.RX_id)
+        interference = rx_power_movil_tx1
 
     # Asignación de la tablet
-    rx_power_tablet_tx1 = me.received_power(transmisor.TX_gain, tablet.RX_gain, transmisor.TX_power,
-                                           free_space_path_loss_TX_tablet)
-    rx_power_tablet_tx2 = me.received_power(repetidor.TX_gain, tablet.RX_gain, repetidor.TX_power,
-                                           free_space_path_loss_repe_tablet)
+    rx_power_tablet_tx1 = me.received_power(transmisor.TX_gain, tablet.RX_gain, transmisor.TX_power,free_space_path_loss_TX_tablet)
+    rx_power_tablet_tx2 = me.received_power(repetidor.TX_gain, tablet.RX_gain, repetidor.TX_power, free_space_path_loss_repe_tablet)
 
     if rx_power_tablet_tx1 > rx_power_tablet_tx2:
         tablet.RX_power = rx_power_tablet_tx1
+        transmisor.connected_devices.append(tablet.RX_id)
     else:
         tablet.RX_power = rx_power_tablet_tx2
-
-    signal_to_noise_ratio_movil = me.calculate_sinr(received_power_movil, p_noise, tablet.RX_power)
-    print("SINR: " + str(signal_to_noise_ratio_movil))
-
-    movil.RX_bandwidth = transmisor.TX_bandwidth/2
-    tablet.RX_bandwidth = transmisor.TX_bandwidth/2
-
-    db_snr = mu.lineal_units_to_dbm(signal_to_noise_ratio_movil)
-    capacity = me.capacity(movil.RX_bandwidth, db_snr)
-    print("Capacidad del enlace TX-Móvil: " + str(capacity * 10e6) + " bps")
+        repetidor.connected_devices.append(tablet.RX_id)
 
 
+    # SINR
+    snr_movil = me.calculate_sinr(movil.RX_power, p_noise, interference)
+    #print("SINR movil: "+str(snr_movil))
+    snr_tablet = me.calculate_sinr(tablet.RX_power, p_noise, interference)
+    #print("SINR tablet: "+str(snr_tablet))
+
+    # Capacidad y asignación de ancho de banda
+    if movil.RX_id in transmisor.connected_devices:
+        movil.RX_bandwidth = transmisor.TX_bandwidth / len(transmisor.connected_devices)
+    elif movil.RX_id in repetidor.connected_devices:
+        movil.RX_bandwidth = repetidor.TX_bandwidth / len(repetidor.connected_devices)
+
+    if tablet.RX_id in transmisor.connected_devices:
+        tablet.RX_bandwidth = transmisor.TX_bandwidth / len(transmisor.connected_devices)
+    elif tablet.RX_id in repetidor.connected_devices:
+        tablet.RX_bandwidth = repetidor.TX_bandwidth / len(repetidor.connected_devices)
+
+    capacity_movil = me.capacity(movil.RX_bandwidth,mu.dbm_to_lineal_units(snr_movil))
+    print("Capacidad del enlace TX-RX movil :" + str(capacity_movil) + " Mbps")
+    capacity_tablet = me.capacity(tablet.RX_bandwidth,mu.dbm_to_lineal_units(snr_tablet))
+    print("Capacidad del enlace eTX-RX tablet :" + str(capacity_movil) + " Mbps")
+
+    print(transmisor.connected_devices)
 
