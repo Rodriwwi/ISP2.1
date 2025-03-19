@@ -65,20 +65,25 @@ if __name__ == '__main__':
     print("Pérdidas en espacio libre entre el repetidor y la tablet: " + str(free_space_path_loss_repe_movil) + " dB")
 
 
-    # Potencia recibida.
+    # Asignación del movil
+    rx_power_movil_tx1 = me.received_power(transmisor.TX_gain, movil.RX_gain, transmisor.TX_power, free_space_path_loss_TX_movil)
+    rx_power_movil_tx2 = me.received_power(repetidor.TX_gain, movil.RX_gain, repetidor.TX_power, free_space_path_loss_repe_movil)
 
-    rx_power_movil_tx2 = me.received_power(transmisor.TX_gain, movil.RX_gain, transmisor.TX_power, free_space_path_loss_TX_movil)
-    rx_power_movil_tx2 = me.
-    # en la tablet
-    distancia_TX_tablet = mu.calculate_distance(transmisor.TX_position, tablet.RX_position)
-    print("Distancia TX-Tablet: " + str(distancia_TX_tablet) + "m")
+    if rx_power_movil_tx1 > rx_power_movil_tx2:
+        movil.RX_power = rx_power_movil_tx1
+    else:
+        movil.RX_power = rx_power_movil_tx2
 
-    free_space_path_loss_TX_tablet = me.free_space_path_losses(distancia_TX_tablet, transmisor.TX_frequency)
-    print("Pérdidas en espacio libre entre el TX y la tablet: " + str(free_space_path_loss_TX_tablet) + " dB")
+    # Asignación de la tablet
+    rx_power_tablet_tx1 = me.received_power(transmisor.TX_gain, tablet.RX_gain, transmisor.TX_power,
+                                           free_space_path_loss_TX_tablet)
+    rx_power_tablet_tx2 = me.received_power(repetidor.TX_gain, tablet.RX_gain, repetidor.TX_power,
+                                           free_space_path_loss_repe_tablet)
 
-    received_power_tablet = me.received_power(transmisor.TX_gain, tablet.RX_gain, transmisor.TX_power,free_space_path_loss_TX_tablet)
-    tablet.RX_power = received_power_tablet
-    print("Potencia recibida por la tablet: " + str(movil.RX_power) + " mW")
+    if rx_power_tablet_tx1 > rx_power_tablet_tx2:
+        tablet.RX_power = rx_power_tablet_tx1
+    else:
+        tablet.RX_power = rx_power_tablet_tx2
 
     signal_to_noise_ratio_movil = me.calculate_sinr(received_power_movil, p_noise, tablet.RX_power)
     print("SINR: " + str(signal_to_noise_ratio_movil))
