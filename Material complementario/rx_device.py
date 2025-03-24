@@ -26,8 +26,10 @@ class RxDevice:
     RX_gain: float = 0.0  # dBi
     RX_power: float = 0.0  # dBm
     RX_bandwidth: float = 0.0  # MHz
+    RX_steps: List = []
+    connected_TX = ""
 
-    def __init__(self, rx_id: str, first_position: Tuple[float, float], height: float, gain: float, assigned_bandwidth: float):
+    def __init__(self, rx_id: str, first_position: Tuple[float, float], height: float, gain: float, assigned_bandwidth: float, steps_param: List):
         """
             'Init' method of the class 'RxDevice'.
             Constructor. Parametrized the object according to the entered parameters.
@@ -45,6 +47,14 @@ class RxDevice:
         self.RX_gain = gain
         self.RX_bandwidth = assigned_bandwidth
         self.RX_power = -9999  # ¿?
+        self.connected_TX = ""
+
+        self.RX_steps = []
+        self.RX_steps.append(self.RX_position)
+
+        # Añadimos los pasos al vector de posiciones
+        for i in range(0, len(steps_param)):
+            self.RX_steps.append(steps_param[i])
 
     def __str__(self):
         """

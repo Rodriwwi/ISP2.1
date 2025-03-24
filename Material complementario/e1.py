@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     # Object instance
     tx_1 = TransmitterAntenna("TX_1",tx_pos, elevation_tx,bw,freq/1000,p_tx,gain_tx)
-    rx_1 = RxDevice("RX_1",rx_pos, elevation_rx,gain_rx,0)
+    rx_1 = RxDevice("RX_1",rx_pos, elevation_rx,gain_rx,0,)
 
     # Logica
     distance_TX_RX = mu.calculate_distance(tx_1.TX_position,rx_1.RX_position)

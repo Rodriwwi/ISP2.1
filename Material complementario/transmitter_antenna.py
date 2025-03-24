@@ -3,23 +3,6 @@ import json
 
 
 class TransmitterAntenna:
-    """
-        Attributes
-        ----------
-        - TX_id [str]: transmitter identifier.
-        - TX_position [tuple of floats]: current X and Y position of the transmitter (related to the simulation scenario).
-        - TX_height [float]: height of the antenna transmitter.
-        - TX_bandwidth [float]: bandwidth allocated by the transmitter for the communication link.
-        - TX_frequency [float]: operational frequency.
-        - TX_power [float]: transmitter power.
-        - TX_gain [float]: gain of the transmitter antenna.
-
-        Methods
-        -------
-        - __init__: Constructor. Parametrized the object according to the entered parameters.
-        - __str__: information for output by file or by screen of results.
-        - to_dict: it creates a dictionary with the values of the object to be used by the subclass to dump the values into a json file.
-    """
 
     TX_id: str = ""  # Example = "TX_1"
     TX_position: Tuple[float, float] = (0.0, 0.0)  # (x,y)
@@ -49,7 +32,7 @@ class TransmitterAntenna:
         self.TX_id = tx_id
         self.TX_position = position
         self.TX_height = height
-        self.TX_bandwidth = bandwidth 
+        self.TX_bandwidth = bandwidth
         self.TX_frequency = frequency
         self.TX_gain = gain
         self.TX_power = p_tx
